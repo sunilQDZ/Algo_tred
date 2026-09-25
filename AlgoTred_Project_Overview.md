@@ -53,12 +53,13 @@ Every trade is logged in the journal for review
 |---|---|---|---|---|
 | AI Natural Language Strategy | ✅ Yes | ❌ No | ❌ No | ❌ No |
 | Multi-Broker Support | ✅ 5 Brokers | ❌ Zerodha only | ❌ Manual | ❌ Zerodha/Upstox |
+| Indian Statutory Charges Engine | ✅ Full Tax & Fees | ❌ Partial | ❌ No | ✅ Basic |
+| Options Strategy Presets & Greeks | ✅ 4 Presets + Greeks | ❌ Limited | ❌ No | ✅ Yes |
 | AI Optimizer | ✅ Neural Grid Search | ❌ No | ❌ No | ❌ No |
 | Monte Carlo Simulation | ✅ 500 paths | ❌ No | ❌ No | ❌ No |
 | Trade Journal | ✅ Full P&L analytics | ✅ Basic | ❌ No | ✅ Basic |
-| Options Strategy Builder | ✅ Multi-leg P&L | ❌ Limited | ❌ No | ✅ Yes |
 | Risk Profiling | ✅ Adaptive | ❌ No | ❌ No | ❌ No |
-| Paper Trading | ✅ Built-in | ✅ Yes | ❌ No | ❌ No |
+| Paper Trading | ✅ Built-in WebSockets | ✅ Yes | ❌ No | ❌ No |
 
 ---
 
@@ -1031,30 +1032,26 @@ Compliance (India)
 
 ## Summary: Current Project Status
 
-### ✅ Fully Built (Frontend + Demo Data)
-- Live Dashboard with streaming P&L
-- Strategy Builder with visual blocks
-- Backtest Workspace with charts & metrics
-- AI Optimizer with recommendations
-- Options Strategy Lab with P&L payoff charts
-- Monte Carlo Simulator (500 paths)
-- Market Radar with sector heatmap
-- Trade Journal with full analytics
-- Broker Manager UI (5 brokers)
-- TradingView Webhook UI
-- Risk Questionnaire
-- AlgoSetu Interactive Demo (English + Hindi)
-- Billing & Plans UI
-- Authentication (register/login/JWT)
-- Marketing landing page
+### ✅ Fully Built & Tested Engine (Frontend + Backend + Paper Broker)
+- **Live Dashboard**: Real-time WebSockets streaming tick prices, unrealized P&L, realized P&L, & Emergency Kill Switch.
+- **Indian Statutory Charges & Tax Engine**: Precise calculations for STT, Brokerage (₹20/leg), Exchange Txn Charges (0.00345%), GST (18%), SEBI Turnover fees, & Stamp Duty.
+- **Backtest Workspace**: Vectorized + bar-by-bar backtesting with interactive equity growth vs benchmark, drawdown, and trade log audit.
+- **Options Strategy Lab**: Multi-leg payoff diagrams, Black-Scholes Greeks ($\Delta, \Gamma, \Theta, \nu$), 25-lot size standards, and 4 quick-load presets (Bull Call Spread, Bear Put Spread, Short Straddle, Iron Condor).
+- **Strategy Builder**: Visual condition blocks + AI natural language strategy parser.
+- **AI Optimizer**: Optuna grid & neural hyperparameter optimization.
+- **Monte Carlo Simulator**: 500-path probabilistic risk & drawdown simulation.
+- **Market Radar**: India VIX, FII/DII Net Flows (INR Cr), NSE Sector Heatmap, & Volume Spike Breakout Radar.
+- **Trade Journal**: Full trade log & P&L analytics.
+- **Broker Manager**: Support for Zerodha Kite Connect, Dhan HQ, Angel One, Upstox, Fyers, and Paper Trading.
+- **TradingView Webhooks**: Automated webhook signal creation.
+- **Billing & Plans**: Razorpay payment flow for Free (₹0), Pro (₹2,999/mo), and Institutional (₹9,999/mo).
+- **Automated Test Suite**: 100% passing Pytest suite (`pytest`) & clean TypeScript production build (`npm run build`).
 
-### 🔌 Ready for API Connection (needs broker API keys)
-- Live broker OAuth (Zerodha, Dhan, Angel One, Upstox, Fyers)
-- Real market data subscription
-- Signal engine deployment (Celery workers)
-- LLM integration for AI strategy builder
-- Production PostgreSQL + TimescaleDB
-- Razorpay payment processing
+### 🔌 Ready for Production Live Trading API Setup (needs broker credentials)
+- Live broker OAuth authorization (Zerodha, Dhan, Angel One, Upstox, Fyers)
+- Live WebSocket market feed subscription
+- Celery worker signal execution queue
+- Production PostgreSQL + TimescaleDB deployment
 
 ---
 
