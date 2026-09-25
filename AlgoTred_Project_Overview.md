@@ -657,15 +657,15 @@ This helps identify psychological patterns that hurt your performance.
 
 The Broker Manager handles **secure connection between AlgoTred and your broker accounts**.
 
-### Supported Brokers & API Costs
+### Supported Brokers & Free API Testing Options
 
-| Broker | API Cost | Free Historical Data | Order Placement |
+| Broker | API Cost | Free Test Credentials | Sandbox / Testing Options |
 |---|---|---|---|
-| Zerodha (Kite Connect) | ₹500/month | 60 days | Free |
-| Upstox | ₹500/month | 2 years | ₹10/order promo |
-| Angel One (SmartAPI) | Free | 1 year | Standard brokerage |
-| Dhan | Free | 1 year | Standard brokerage |
-| Fyers | Free | 400 days | Standard brokerage |
+| **Paper Trading Simulator** | **FREE (Built-in)** | ✅ No setup required | ⚡ Built-in zero-risk virtual execution with live price stream |
+| **Dhan (DhanHQ)** | **FREE** | ✅ Instant Access Token | 🆓 100% Free API keys generated directly in Dhan app/web |
+| **Angel One (SmartAPI)** | **FREE** | ✅ Free API Registration | 🆓 Free developer app key at [smartapi.angelone.in](https://smartapi.angelone.in) |
+| **Upstox API v2** | **FREE** | ✅ Free App Creation | 🆓 Free developer app access at [upstox.com/developer](https://upstox.com/developer) |
+| **Zerodha (Kite Connect)** | ₹2,000/month | ⚠️ Paid API key | Live order placement API key via [developers.kite.trade](https://developers.kite.trade) |
 
 ### Zerodha Connection Flow
 
@@ -842,13 +842,30 @@ Response: {
 
 ---
 
-## 17. API Architecture
+## 17. API & Quantitative Intelligence Architecture
 
-### Base URL
-```
-Development: http://localhost:8000/api/v1
-Production:  https://api.algotred.com/api/v1
-```
+### 🧠 Intelligence Architecture Stack
+
+AlgoTred combines **LLMs, REST APIs, Quantitative Trading Algorithms, and WebSockets**:
+
+1. **🤖 LLM Natural Language Parser**:
+   - Endpoint: `POST /api/v1/strategies/parse-prompt`
+   - Converts natural language trader prompts (e.g. *"Buy Nifty when RSI < 30 and volume > 2x 20-day SMA"*) into structured indicator JSON parameters and rule conditions.
+
+2. **🌐 REST APIs (FastAPI Core)**:
+   - Base URL: `http://localhost:8000/api/v1` (Dev) / `https://api.algotred.com/api/v1` (Prod)
+   - High-throughput asynchronous routes for authentication, strategy creation, historical CSV upload processing (`/backtests/upload-csv-run`), backtests, optimizations, and Razorpay subscription billing.
+
+3. **⚡ Quantitative Algos & Machine Learning**:
+   - **Signal Generation Algos**: Vectorized indicator calculation (`RSI`, `EMA Crossover`, `Supertrend`, `VWAP`, `Bollinger Bands`, `MACD`) via Pandas & NumPy.
+   - **Backtesting & Statutory Tax Algo**: Bar-by-bar chronological trade simulator deducting exact Indian statutory taxes (STT, Brokerage ₹20/leg, Exchange charges, GST 18%, SEBI fee, Stamp duty).
+   - **Optuna ML Hyperparameter Optimizer**: Uses **Bayesian Optimization** (Tree-structured Parzen Estimator) to test parameter spaces and maximize Sharpe ratio.
+   - **Black-Scholes Options Model**: Calculates real-time option prices and Greeks ($\Delta, \Gamma, \Theta, \nu$) and multi-leg expiry payoff matrices.
+   - **Monte Carlo Stochastic Simulation**: Runs 500 Geometric Brownian Motion random walk paths to calculate tail drawdown probability.
+
+4. **📡 WebSockets (Real-Time Live Streaming)**:
+   - Endpoint: `ws://<host>/ws/live/{deployment_id}`
+   - Pushes live price ticks (LTP), unrealized P&L, realized P&L, and Emergency Kill-Switch signals directly to the React frontend dashboard every second.
 
 ### Complete API Reference
 

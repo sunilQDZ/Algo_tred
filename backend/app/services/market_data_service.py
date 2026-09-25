@@ -74,3 +74,40 @@ class MarketDataService:
         })
         df.set_index("timestamp", inplace=True)
         return df
+
+    @staticmethod
+    def parse_csv_to_df(csv_file_bytes: bytes) -> pd.DataFrame:
+        """
+        Parses uploaded historical CSV data bytes into standardized OHLC DataFrame.
+        Supports standard column names: date/timestamp/time, open, high, low, close, volume.
+        """
+        import io
+        df = pd.read_csv(io.BytesIO(csv_file_bytes))
+        
+        # Standardize column headers to lowercase
+        df.columns = [str(c).strip().lower() for c in df.columns]
+        
+        # Rename date/time column if needed
+        time_col = None
+        for col in ["timestamp", "date", "datetime", "time"]:
+            if col in df.columns:
+                time_col = col
+                break
+        
+        if time_col:
+            df["timestamp"] = pd.to_datetime(df[time_col])
+            df.set_index("timestamp", inplace=True)
+        else:
+            df.index = pd.date_range(start="2023-01-01", periods=len(df), freq="15min")
+            df.index.name = "timestamp"
+
+        # Ensure required columns exist
+        for req in ["open", "high", "low", "close"]:
+            if req not in df.columns:
+                raise ValueError(f"Missing required OHLC column: '{req}' in CSV")
+
+        if "volume" not in df.columns:
+            df["volume"] = 10000
+
+        df = df[["open", "high", "low", "close", "volume"]].astype(float)
+        return df

@@ -466,6 +466,35 @@ export const api = {
     return { ...DEMO_BACKTEST_RUN, strategy_id, start_date, end_date, initial_capital };
   },
 
+  async uploadCsvBacktest(file: File, initial_capital: number): Promise<BacktestRun> {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('initial_capital', initial_capital.toString());
+      const res = await fetch(`${API_BASE}/backtests/upload-csv-run`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return {
+          id: `bt-csv-${Date.now()}`,
+          strategy_id: 'csv-upload',
+          params_used: {},
+          start_date: 'CSV Dataset',
+          end_date: 'CSV Dataset',
+          initial_capital,
+          metrics: data.results.metrics,
+          equity_curve: data.results.equity_curve,
+          trade_log: data.results.trade_log,
+          status: 'COMPLETED',
+          created_at: new Date().toISOString()
+        };
+      }
+    } catch (e) {}
+    return { ...DEMO_BACKTEST_RUN, initial_capital };
+  },
+
   async getLatestBacktest(strategy_id: string): Promise<BacktestRun> {
     try {
       const res = await fetch(`${API_BASE}/backtests/strategy/${strategy_id}/latest`, { headers: getHeaders() });

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TrendingUp, Play, Calendar, DollarSign, Award, AlertTriangle, Cpu, Layers } from 'lucide-react';
+import { TrendingUp, Play, Calendar, DollarSign, Award, AlertTriangle, Cpu, Layers, Upload } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { Strategy, BacktestRun } from '../types';
 import { api } from '../api';
@@ -39,6 +39,21 @@ export const BacktestWorkspace: React.FC<BacktestWorkspaceProps> = ({ strategy, 
     }
   };
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    setLoading(true);
+    try {
+      const res = await api.uploadCsvBacktest(file, initialCapital);
+      setBacktestRun(res);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const metrics = backtestRun?.metrics;
 
   return (
@@ -56,6 +71,20 @@ export const BacktestWorkspace: React.FC<BacktestWorkspaceProps> = ({ strategy, 
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          {/* Initial Capital Selector */}
+          <div className="flex items-center gap-1.5 bg-gray-900 border border-gray-800 rounded-xl px-3 py-1.5 text-xs text-gray-300">
+            <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-gray-400 font-medium">Cap: ₹</span>
+            <input
+              type="number"
+              step="10000"
+              value={initialCapital}
+              onChange={(e) => setInitialCapital(parseFloat(e.target.value) || 100000)}
+              className="bg-transparent border-none outline-none text-emerald-400 font-mono w-24 font-bold"
+            />
+          </div>
+
+          {/* Date Range Picker */}
           <div className="flex items-center gap-2 bg-gray-900 border border-gray-800 rounded-xl px-3 py-1.5 text-xs text-gray-300">
             <Calendar className="w-3.5 h-3.5 text-cyan-400" />
             <input
@@ -73,6 +102,14 @@ export const BacktestWorkspace: React.FC<BacktestWorkspaceProps> = ({ strategy, 
             />
           </div>
 
+          {/* CSV File Upload Button */}
+          <label className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gray-900 hover:bg-gray-800 text-cyan-400 border border-cyan-800 text-xs font-semibold cursor-pointer transition-all shadow-sm">
+            <Upload className="w-4 h-4 text-cyan-400" />
+            <span>Upload Historical CSV</span>
+            <input type="file" accept=".csv" onChange={handleFileUpload} className="hidden" />
+          </label>
+
+          {/* Run Backtest Trigger */}
           <button
             onClick={handleRunBacktest}
             disabled={loading || !strategy}

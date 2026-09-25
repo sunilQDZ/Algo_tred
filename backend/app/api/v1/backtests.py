@@ -111,3 +111,47 @@ async def get_backtest_by_id(
     if not bt:
         raise HTTPException(status_code=404, detail="Backtest run not found")
     return bt
+
+
+from fastapi import UploadFile, File, Form
+
+@router.post("/upload-csv-run")
+async def run_custom_csv_backtest(
+    file: UploadFile = File(...),
+    initial_capital: float = Form(100000.0),
+    stop_loss_pct: float = Form(1.5),
+    target_pct: float = Form(3.0),
+    rsi_period: int = Form(14),
+    rsi_oversold: float = Form(30.0)
+):
+    """
+    Ingests any uploaded historical OHLC CSV file (from Zerodha, TradingView, or NSE)
+    and executes full backtesting engine producing CAGR, Sharpe, Drawdown, Taxes & Trade Log.
+    """
+    content = await file.read()
+    df = MarketDataService.parse_csv_to_df(content)
+
+    rules_dict = {
+        "logic_operator": "AND",
+        "entry_conditions": [
+            {"indicator": "RSI", "params": {"period": rsi_period}, "operator": "<", "value": rsi_oversold}
+        ],
+        "exit_conditions": [],
+        "stop_loss_pct": stop_loss_pct,
+        "target_pct": target_pct,
+        "position_size_type": "fixed_cash",
+        "position_size_value": initial_capital
+    }
+    rules_schema = StrategyRulesSchema(**rules_dict)
+
+    results = BacktestEngine.run_backtest(
+        df=df,
+        rules=rules_schema,
+        initial_capital=initial_capital
+    )
+
+    return {
+        "filename": file.filename,
+        "total_bars_processed": len(df),
+        "results": results
+    }
