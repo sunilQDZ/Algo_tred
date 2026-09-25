@@ -80,11 +80,37 @@ class BacktestEngine:
                     exit_price = curr_close
 
                 if exit_reason:
-                    # Close trade
                     exit_price_adj = exit_price * (1 - slippage_pct / 100.0)
+                    # Calculate exact Indian Statutory Charges
+                    buy_turnover = entry_price * entry_qty
+                    sell_turnover = exit_price_adj * entry_qty
+                    total_turnover = buy_turnover + sell_turnover
+
+                    # Brokerage: min(20 per leg, 0.03% of turnover per leg)
+                    leg1_brokerage = min(brokerage_per_trade, buy_turnover * 0.0003)
+                    leg2_brokerage = min(brokerage_per_trade, sell_turnover * 0.0003)
+                    trade_brokerage = leg1_brokerage + leg2_brokerage
+
+                    # STT (Securities Transaction Tax): 0.025% on Intraday Sell side
+                    trade_stt = sell_turnover * 0.00025
+
+                    # Exchange Txn Charges: 0.00345% of total turnover
+                    trade_exchange = total_turnover * 0.0000345
+
+                    # SEBI Turnover Charges: 0.0001% of total turnover
+                    trade_sebi = total_turnover * 0.000001
+
+                    # Stamp Duty: 0.003% on Buy turnover
+                    trade_stamp = buy_turnover * 0.00003
+
+                    # GST: 18% on (Brokerage + Exchange Txn Charges)
+                    trade_gst = 0.18 * (trade_brokerage + trade_exchange)
+
+                    trade_total_charges = round(trade_brokerage + trade_stt + trade_exchange + trade_sebi + trade_stamp + trade_gst, 2)
+
                     gross_pnl = (exit_price_adj - entry_price) * entry_qty
-                    net_pnl = gross_pnl - (2 * brokerage_per_trade)
-                    pnl_pct = (net_pnl / (entry_price * entry_qty)) * 100.0
+                    net_pnl = gross_pnl - trade_total_charges
+                    pnl_pct = (net_pnl / buy_turnover) * 100.0 if buy_turnover > 0 else 0.0
 
                     capital += net_pnl
 
@@ -97,6 +123,7 @@ class BacktestEngine:
                         "entry_price": round(entry_price, 2),
                         "exit_price": round(exit_price_adj, 2),
                         "gross_pnl": round(gross_pnl, 2),
+                        "total_charges": trade_total_charges,
                         "net_pnl": round(net_pnl, 2),
                         "pnl_pct": round(pnl_pct, 2),
                         "exit_reason": exit_reason
@@ -153,7 +180,11 @@ class BacktestEngine:
         else:
             cagr_pct = total_return_pct
 
-        # Win Rate & Sharpe Ratio
+        # Win Rate, Sharpe & Statutory Charges aggregation
+        total_gross_pnl = sum(t["gross_pnl"] for t in trade_log)
+        total_statutory_charges = round(sum(t["total_charges"] for t in trade_log), 2)
+        total_net_pnl = round(final_equity - initial_capital, 2)
+
         if len(trade_log) > 0:
             winning_trades = [t for t in trade_log if t["net_pnl"] > 0]
             losing_trades = [t for t in trade_log if t["net_pnl"] <= 0]
@@ -182,7 +213,10 @@ class BacktestEngine:
             "profit_factor": profit_factor,
             "total_trades": len(trade_log),
             "winning_trades": len([t for t in trade_log if t["net_pnl"] > 0]),
-            "losing_trades": len([t for t in trade_log if t["net_pnl"] <= 0])
+            "losing_trades": len([t for t in trade_log if t["net_pnl"] <= 0]),
+            "total_gross_pnl": round(total_gross_pnl, 2),
+            "total_statutory_charges": total_statutory_charges,
+            "total_net_pnl": total_net_pnl
         }
 
         # Downsample equity curve for fast UI charting if too large

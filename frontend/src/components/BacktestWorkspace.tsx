@@ -153,19 +153,33 @@ export const BacktestWorkspace: React.FC<BacktestWorkspaceProps> = ({ strategy, 
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
             <div className="bg-gray-900/60 p-3 rounded-xl border border-gray-800">
               <div className="text-gray-400 text-[11px]">Gross Backtest P&L</div>
-              <div className="text-sm font-bold text-white font-mono mt-1">+₹{Math.round((metrics.final_equity - initialCapital) * 1.12).toLocaleString()}</div>
+              <div className="text-sm font-bold text-white font-mono mt-1">
+                {metrics.total_gross_pnl !== undefined
+                  ? `${metrics.total_gross_pnl >= 0 ? '+' : ''}₹${metrics.total_gross_pnl.toLocaleString()}`
+                  : `+₹${Math.round((metrics.final_equity - initialCapital) * 1.12).toLocaleString()}`}
+              </div>
             </div>
             <div className="bg-gray-900/60 p-3 rounded-xl border border-gray-800">
-              <div className="text-gray-400 text-[11px]">Brokerage, STT & GST (18%)</div>
-              <div className="text-sm font-bold text-rose-400 font-mono mt-1">-₹{Math.round((metrics.final_equity - initialCapital) * 0.08).toLocaleString()}</div>
+              <div className="text-gray-400 text-[11px]">Brokerage, STT, GST & SEBI</div>
+              <div className="text-sm font-bold text-rose-400 font-mono mt-1">
+                {metrics.total_statutory_charges !== undefined
+                  ? `-₹${metrics.total_statutory_charges.toLocaleString()}`
+                  : `-₹${Math.round((metrics.final_equity - initialCapital) * 0.08).toLocaleString()}`}
+              </div>
             </div>
             <div className="bg-gray-900/60 p-3 rounded-xl border border-gray-800">
               <div className="text-gray-400 text-[11px]">Volume-Based Slippage</div>
-              <div className="text-sm font-bold text-rose-400 font-mono mt-1">-₹{Math.round((metrics.final_equity - initialCapital) * 0.04).toLocaleString()}</div>
+              <div className="text-sm font-bold text-rose-400 font-mono mt-1">
+                0.05% per trade
+              </div>
             </div>
             <div className="bg-emerald-950/40 p-3 rounded-xl border border-emerald-800/60">
               <div className="text-emerald-400 text-[11px] font-semibold">Net Realized P&L</div>
-              <div className="text-sm font-extrabold text-emerald-400 font-mono mt-1">+₹{Math.round(metrics.final_equity - initialCapital).toLocaleString()}</div>
+              <div className="text-sm font-extrabold text-emerald-400 font-mono mt-1">
+                {metrics.total_net_pnl !== undefined
+                  ? `${metrics.total_net_pnl >= 0 ? '+' : ''}₹${metrics.total_net_pnl.toLocaleString()}`
+                  : `+₹${Math.round(metrics.final_equity - initialCapital).toLocaleString()}`}
+              </div>
             </div>
           </div>
 

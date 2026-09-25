@@ -55,6 +55,9 @@ export interface BacktestMetrics {
   total_trades: number;
   winning_trades: number;
   losing_trades: number;
+  total_gross_pnl?: number;
+  total_statutory_charges?: number;
+  total_net_pnl?: number;
 }
 
 export interface EquityPoint {

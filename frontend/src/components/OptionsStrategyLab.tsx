@@ -3,10 +3,10 @@ import { Layers, Plus, Trash2, Calculator, TrendingUp, ShieldAlert } from 'lucid
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine } from 'recharts';
 
 export const OptionsStrategyLab: React.FC = () => {
-  const [spotPrice, setSpotPrice] = useState(19500);
+  const [spotPrice, setSpotPrice] = useState(24500);
   const [legs, setLegs] = useState([
-    { option_type: 'CE', strike: 19500, action: 'BUY', premium: 180, qty: 50 },
-    { option_type: 'CE', strike: 19700, action: 'SELL', premium: 85, qty: 50 }
+    { option_type: 'CE', strike: 24500, action: 'BUY', premium: 180, qty: 25 },
+    { option_type: 'CE', strike: 24700, action: 'SELL', premium: 85, qty: 25 }
   ]);
 
   const [payoffData, setPayoffData] = useState<any>(null);
@@ -28,8 +28,34 @@ export const OptionsStrategyLab: React.FC = () => {
       .catch(console.error);
   }, [spotPrice, legs]);
 
+  const applyPreset = (presetName: string) => {
+    if (presetName === 'bull_call') {
+      setLegs([
+        { option_type: 'CE', strike: spotPrice, action: 'BUY', premium: 180, qty: 25 },
+        { option_type: 'CE', strike: spotPrice + 200, action: 'SELL', premium: 85, qty: 25 }
+      ]);
+    } else if (presetName === 'bear_put') {
+      setLegs([
+        { option_type: 'PE', strike: spotPrice, action: 'BUY', premium: 170, qty: 25 },
+        { option_type: 'PE', strike: spotPrice - 200, action: 'SELL', premium: 75, qty: 25 }
+      ]);
+    } else if (presetName === 'short_straddle') {
+      setLegs([
+        { option_type: 'CE', strike: spotPrice, action: 'SELL', premium: 180, qty: 25 },
+        { option_type: 'PE', strike: spotPrice, action: 'SELL', premium: 170, qty: 25 }
+      ]);
+    } else if (presetName === 'iron_condor') {
+      setLegs([
+        { option_type: 'PE', strike: spotPrice - 300, action: 'BUY', premium: 35, qty: 25 },
+        { option_type: 'PE', strike: spotPrice - 150, action: 'SELL', premium: 90, qty: 25 },
+        { option_type: 'CE', strike: spotPrice + 150, action: 'SELL', premium: 95, qty: 25 },
+        { option_type: 'CE', strike: spotPrice + 300, action: 'BUY', premium: 40, qty: 25 }
+      ]);
+    }
+  };
+
   const addLeg = () => {
-    setLegs([...legs, { option_type: 'PE', strike: 19400, action: 'BUY', premium: 120, qty: 50 }]);
+    setLegs([...legs, { option_type: 'PE', strike: spotPrice - 100, action: 'BUY', premium: 120, qty: 25 }]);
   };
 
   const removeLeg = (idx: number) => {
@@ -95,8 +121,29 @@ export const OptionsStrategyLab: React.FC = () => {
 
       {/* Multi-leg Option Legs Builder */}
       <div className="glass-panel p-6 rounded-2xl space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider">Multi-Leg Strategy Legs</h3>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-4">
+          <div>
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Multi-Leg Strategy Builder</h3>
+            <p className="text-[11px] text-gray-400">Quick-load popular Indian Options Spread Presets:</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button onClick={() => applyPreset('bull_call')} className="px-2.5 py-1 rounded-lg bg-gray-900 hover:bg-gray-800 text-cyan-400 border border-cyan-800/60 text-[11px] font-semibold">
+              Bull Call Spread
+            </button>
+            <button onClick={() => applyPreset('bear_put')} className="px-2.5 py-1 rounded-lg bg-gray-900 hover:bg-gray-800 text-rose-400 border border-rose-800/60 text-[11px] font-semibold">
+              Bear Put Spread
+            </button>
+            <button onClick={() => applyPreset('short_straddle')} className="px-2.5 py-1 rounded-lg bg-gray-900 hover:bg-gray-800 text-amber-400 border border-amber-800/60 text-[11px] font-semibold">
+              Short Straddle
+            </button>
+            <button onClick={() => applyPreset('iron_condor')} className="px-2.5 py-1 rounded-lg bg-gray-900 hover:bg-gray-800 text-purple-400 border border-purple-800/60 text-[11px] font-semibold">
+              Iron Condor
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-1">
+          <span className="text-xs text-gray-400 font-semibold">Legs Configuration:</span>
           <button onClick={addLeg} className="flex items-center gap-1 text-xs text-cyan-400 font-semibold hover:text-cyan-300">
             <Plus className="w-3.5 h-3.5" /> Add Option Leg
           </button>
